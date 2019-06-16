@@ -48,6 +48,12 @@ legend {
   margin-bottom: 0.5em;
 }
 
+.review-author,
+.review-timestamp {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
 .badge-default, .btn-primary {
   background-color: #ad1d28;
   border-color: #911821;
