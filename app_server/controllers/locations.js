@@ -8,6 +8,26 @@ if (process.env.NODE_ENV === 'production') {
     apiOptions.server = 'https://gentle-fortress-68805.herokuapp.com/';
 }
 
+const showError = (req, res, status) => {
+    let title = '';
+    let content = '';
+
+    if (status === 404) {
+        title = '404, page not found';
+        content = 'Oh dear. Looks like you can\'t find this page. Sorry.';
+    }
+    else {
+        title = `${status} something's gone wrong`;
+        content = 'Something, somewhere, has gone just a little bit wrong.';
+    }
+
+    res.status(status);
+    res.render('generic-text', {
+        title,
+        content
+    });
+};
+
 const renderHomepage = (req, res, body) => {
     let message = null;
 
@@ -96,6 +116,11 @@ const locationInfo = (req, res) => {
     };
 
     request(requestOptions, (err, response, body) => {
+        if (response.statusCode !== 200) {
+            showError(req, res, response.statusCode);
+            return;
+        }
+
         const data = body;
 
         data.coords = {
