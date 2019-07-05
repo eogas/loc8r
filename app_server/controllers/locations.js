@@ -5,7 +5,7 @@ const apiOptions = {
 };
 
 if (process.env.NODE_ENV === 'production') {
-    apiOptions.server = 'https://gentle-fortress-68805.herokuapp.com/';
+    apiOptions.server = 'https://gentle-fortress-68805.herokuapp.com';
 }
 
 const showError = (req, res, status) => {
