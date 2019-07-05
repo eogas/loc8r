@@ -1,5 +1,24 @@
+const request = require('request');
 
-const homelist = (req, res) => {
+const apiOptions = {
+    server: 'http://localhost:3000'
+};
+
+if (process.env.NODE_ENV === 'production') {
+    apiOptions.server = 'https://gentle-fortress-68805.herokuapp.com/';
+}
+
+const renderHomepage = (req, res, body) => {
+    let message = null;
+
+    if (!(body instanceof Array)) {
+        message = 'API lookup error';
+        body = {};
+    }
+    else if (!body.length) {
+        message = 'No places found nearby'
+    }
+
     res.render('locations-list', {
         title: 'Loc8r - find a place to work with wifi',
         sidebar: 'Looking for wifi and a seat? Loc8r helps you find places to work when out and about.',
@@ -7,36 +26,54 @@ const homelist = (req, res) => {
             title: 'Loc8r',
             strapline: 'Find places to work with wifi near you!'
         },
-        locations: [{
-            name: 'Starcups',
-            address: '125 High Street, Reading RG6 1PS',
-            rating: 3,
-            facilities:[
-                'Hot Drinks',
-                'Food',
-                'Premium wifi'
-            ],
-            distance: '100m'
-        }, {
-            name: 'Cafe Hero',
-            address: '125 High Street, Reading RG6 1PS',
-            rating: 4,
-            facilities:[
-                'Hot Drinks',
-                'Food',
-                'Premium wifi'
-            ],
-            distance: '200m'
-        }, {
-            name: 'Burger Queen',
-            address: '125 High Street, Reading RG6 1PS',
-            rating: 2,
-            facilities:[
-                'Food',
-                'Premium wifi'
-            ],
-            distance: '250m'
-        }]
+        locations: body,
+        message: message
+    });
+};
+
+const formatDistance = (distance) => {
+    let thisDistance = 0;
+    let unit = 'm';
+
+    if (distance > 1000) {
+        thisDistance = (distance / 1000.0).toFixed(1);
+        unit = 'km';
+    }
+    else {
+        thisDistance = Math.floor(distance);
+    }
+
+    return `${thisDistance} ${unit}`;
+};
+
+const homelist = (req, res) => {
+    const path = '/api/locations';
+    const requestOptions = {
+        url: `${apiOptions.server}${path}`,
+        method: 'GET',
+        json: {},
+        qs: {
+            lng: -0.7992599,
+            lat: 51.378091,
+            maxDistance: 2000000
+        }
+    };
+
+    request(requestOptions, (err, response, body) => {
+        let data = null;
+
+        if (response.statusCode == 200) {
+            data = [];
+            
+            if (body.length) {
+                data = body.map(location => {
+                    location.distance = formatDistance(location.distance);
+                    return location;
+                });
+            }
+        }
+
+        renderHomepage(req, res, data);
     });
 };
 
