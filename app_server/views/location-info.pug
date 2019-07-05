@@ -43,9 +43,10 @@ block content
                                         span.rating
                                             +outputRating(review.rating)
                                         span.review-author= review.author
-                                        small.review-timestamp= review.timestamp
+                                        small.review-timestamp
+                                            +formatDate(review.createdOn)
                                     .col-12
-                                        +replaceNewlines(review.comment)
+                                        +replaceNewlines(review.reviewText)
         .col-12.col-lg-3
             p.lead= sidebarLead
             p= sidebarSubtext

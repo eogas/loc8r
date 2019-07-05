@@ -6,4 +6,14 @@ mixin outputRating(rating)
         i.far.fa-star
 
 mixin replaceNewlines(str)
-    p !{(str).replace(/\n/g, '<br />')}
+    if (str)
+        p !{(str).replace(/\n/g, '<br />')}
+
+mixin formatDate(str)
+    - const date = new Date(str);
+    - const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    - const d = date.getDate();
+    - const m = monthNames[date.getMonth()];
+    - const y = date.getFullYear();
+    - const output = `${d} ${m} ${y}`;
+    =output
