@@ -79,10 +79,10 @@ const homelist = (req, res) => {
         }
     };
 
-    request(requestOptions, (err, response, body) => {
+    request(requestOptions, (err, { statusCode }, body) => {
         let data = null;
 
-        if (response.statusCode == 200) {
+        if (statusCode == 200) {
             data = [];
             
             if (body.length) {
@@ -106,7 +106,7 @@ const renderDetailPage = (req, res, location) => {
     });
 }
 
-const locationInfo = (req, res) => {
+const getLocationInfo = (req, res, callback) => {
     const locationId = req.params.locationId;
     const path = `/api/locations/${locationId}`;
     const requestOptions = {
@@ -115,9 +115,9 @@ const locationInfo = (req, res) => {
         json: {}
     };
 
-    request(requestOptions, (err, response, body) => {
-        if (response.statusCode !== 200) {
-            showError(req, res, response.statusCode);
+    request(requestOptions, (err, { statusCode }, body) => {
+        if (statusCode !== 200) {
+            showError(req, res, statusCode);
             return;
         }
 
@@ -136,23 +136,62 @@ const locationInfo = (req, res) => {
             return `${ot.days} ${ot.opening} - ${ot.closing}`;
         });
 
+        // TODO
         data.mapUri = 'https://maps.googleapis.com/maps/api/staticmap?center=51.455041,-0.9690884&zoom=17&size=400x350&sensor=false&markers=51.455041,-0.9690884&scale=2&key=AIzaSyCdUIbWu-0_w9uAEjbMQ4ABk7H_uQwu4vg&signature=bIBB8tGSIgwB0Liom_teLSUpShE=';
+        
+        callback(req, res, data);
+    });
+};
 
-        renderDetailPage(req, res, data);
+const locationInfo = (req, res) => {
+    getLocationInfo(req, res, (req, res, location) => {
+        renderDetailPage(req, res, location);
+    });
+};
+
+const doAddReview = (req, res) => {
+    const locationId = req.params.locationId;
+    const path = `/api/locations/${locationId}/reviews`;
+    const postData = {
+        author: req.body.name,
+        rating: parseInt(req.body.rating, 10),
+        reviewText: req.body.review
+    };
+    
+    const requestOptions = {
+        url: `${apiOptions.server}${path}`,
+        method: 'POST',
+        json: postData
+    };
+
+    request(requestOptions, (err, { statusCode }, body) => {
+        if (statusCode !== 201) {
+            showError(req, res, statusCode);
+            return;
+        }
+
+        res.redirect(`/location/${locationId}`);
+    });
+};
+
+const renderReviewForm = (req, res, location) => {
+    res.render('location-review-form', {
+        title: `Review ${location.name} on Loc8r`,
+        pageHeader: {
+            title: `Review ${location.name}`
+        }
     });
 };
 
 const addReview = (req, res) => {
-    res.render('location-review-form', {
-        title: 'Add review',
-        pageHeader: {
-            title: 'Review Starcups'
-        }
+    getLocationInfo(req, res, (req, res, location) => {
+        renderReviewForm(req, res, location);
     });
 };
 
 module.exports = {
     homelist,
     locationInfo,
-    addReview
+    addReview,
+    doAddReview
 };

@@ -35,7 +35,7 @@ block content
                 .col-12
                     .card.card-primary.review-card
                         .card-block
-                            a.btn.btn-primary.float-right(href='/location/review/new') Add Review
+                            a.btn.btn-primary.float-right(href=`/location/${location._id}/review/new`) Add Review
                             h2.card-title Customer Reviews
                             each review in location.reviews
                                 .row.review
